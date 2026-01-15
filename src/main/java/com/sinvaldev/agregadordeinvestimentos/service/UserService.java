@@ -6,17 +6,20 @@ import com.sinvaldev.agregadordeinvestimentos.exception.EmailAlreadyExistsExcept
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;
 import com.sinvaldev.agregadordeinvestimentos.model.User;
 import com.sinvaldev.agregadordeinvestimentos.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+    }
 
     public UserDto createUser(RequestUserDto requestUserDto) {
         if (userRepository.existsUserByEmail(requestUserDto.email())) {
