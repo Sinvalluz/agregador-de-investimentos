@@ -5,7 +5,6 @@ import com.sinvaldev.agregadordeinvestimentos.dtos.ResponseUserDto;
 import com.sinvaldev.agregadordeinvestimentos.dtos.UserDto;
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;
 import com.sinvaldev.agregadordeinvestimentos.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,5 +33,14 @@ public class UserController {
                 .userDtoToResponseUserDto(userDto)
                 .userId()))
                 .build();
+    }
+
+    @GetMapping("/{userId}")
+    public  ResponseEntity<ResponseUserDto> getUserById (@PathVariable String userId) {
+
+        UserDto userDto = userService.findUserById(userId);
+
+        return ResponseEntity.ok(userMapper.userDtoToResponseUserDto(userDto));
+
     }
 }
