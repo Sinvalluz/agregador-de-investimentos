@@ -47,4 +47,16 @@ public class UserService {
 
         return users.stream().map(userMapper::userToUserDto).toList();
     }
+
+    public void deleteById(String userId) {
+        UUID uuid = UUID.fromString(userId);
+        boolean isUser = userRepository.existsById(uuid);
+
+        if (isUser) {
+            userRepository.deleteById(uuid);
+            log.info("Usuário deletado com sucesso");
+        } else {
+            throw new UserNotFoundException();
+        }
+    }
 }
