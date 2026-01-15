@@ -7,10 +7,15 @@ import com.sinvaldev.agregadordeinvestimentos.exception.UserNotFoundException;
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;
 import com.sinvaldev.agregadordeinvestimentos.model.User;
 import com.sinvaldev.agregadordeinvestimentos.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -25,16 +30,17 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    @Transactional
     public UserDto createUser(RequestUserDto requestUserDto) {
-        if (userRepository.existsUserByEmail(requestUserDto.email())) {
-            throw new EmailAlreadyExistsException();
-        }
+        if (userRepository.existsUserByEmail(requestUserDto.email())) throw new EmailAlreadyExistsException();
 
         User user = userRepository.save(userMapper.requestUserDtoToUser(requestUserDto));
         log.info("Usuário criado com sucesso");
+
         return userMapper.userToUserDto(user);
     }
 
+    @Transactional
     public UserDto findUserById (String userId) {
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(UserNotFoundException::new);
@@ -48,11 +54,28 @@ public class UserService {
         return users.stream().map(userMapper::userToUserDto).toList();
     }
 
+    @Transactional
+    public void updateUserById(String userId, RequestUserDto requestUserDto) {
+        UUID uuid = UUID.fromString(userId);
+        User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
+
+        if (requestUserDto.email() != null && userRepository.existsByEmailAndUserIdNot(requestUserDto.email(), uuid)) {
+            throw new EmailAlreadyExistsException();
+        }
+
+        user.setUserName(requestUserDto.userName() == null ? user.getUserName(): requestUserDto.userName());
+        user.setEmail(requestUserDto.email() == null ? user.getEmail(): requestUserDto.email());
+        user.setPassword(requestUserDto.password() == null ? user.getPassword(): requestUserDto.password());
+
+        userRepository.save(user);
+
+        log.info("Usuário atualizado com sucesso");
+    }
+
     public void deleteById(String userId) {
         UUID uuid = UUID.fromString(userId);
-        boolean isUser = userRepository.existsById(uuid);
 
-        if (isUser) {
+        if (userRepository.existsById(uuid)) {
             userRepository.deleteById(uuid);
             log.info("Usuário deletado com sucesso");
         } else {
