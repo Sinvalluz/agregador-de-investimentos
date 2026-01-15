@@ -9,13 +9,8 @@ import com.sinvaldev.agregadordeinvestimentos.model.User;
 import com.sinvaldev.agregadordeinvestimentos.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
