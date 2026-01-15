@@ -9,6 +9,8 @@ import com.sinvaldev.agregadordeinvestimentos.model.User;
 import com.sinvaldev.agregadordeinvestimentos.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -35,8 +37,14 @@ public class UserService {
 
     public UserDto findUserById (String userId) {
         User user = userRepository.findById(UUID.fromString(userId))
-                .orElseThrow(UserNotFoundException::new);;
+                .orElseThrow(UserNotFoundException::new);
 
         return userMapper.userToUserDto(user);
+    }
+
+    public List<UserDto> findAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        return users.stream().map(userMapper::userToUserDto).toList();
     }
 }
