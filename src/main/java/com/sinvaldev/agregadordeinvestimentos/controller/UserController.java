@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 
 @CrossOrigin(origins = "*")
@@ -36,11 +37,19 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public  ResponseEntity<ResponseUserDto> getUserById (@PathVariable String userId) {
+    public ResponseEntity<ResponseUserDto> getUserById (@PathVariable String userId) {
 
         UserDto userDto = userService.findUserById(userId);
 
         return ResponseEntity.ok(userMapper.userDtoToResponseUserDto(userDto));
+    }
 
+    @GetMapping
+    public ResponseEntity<List<ResponseUserDto>> getAllUsers () {
+        List<UserDto> userDtoList = userService.findAllUsers();
+
+        List<ResponseUserDto> responseUserDtoList = userDtoList.stream().map(userMapper::userDtoToResponseUserDto).toList();
+
+        return ResponseEntity.ok(responseUserDtoList);
     }
 }
