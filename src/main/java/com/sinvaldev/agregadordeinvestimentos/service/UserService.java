@@ -7,7 +7,6 @@ import com.sinvaldev.agregadordeinvestimentos.exception.UserNotFoundException;
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;
 import com.sinvaldev.agregadordeinvestimentos.model.User;
 import com.sinvaldev.agregadordeinvestimentos.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -25,7 +24,7 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    @Transactional
+
     public UserDto createUser(RequestUserDto requestUserDto) {
         if (userRepository.existsUserByEmail(requestUserDto.email())) throw new EmailAlreadyExistsException();
 
@@ -35,7 +34,7 @@ public class UserService {
         return userMapper.userToUserDto(user);
     }
 
-    @Transactional
+
     public UserDto findUserById (String userId) {
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(UserNotFoundException::new);
@@ -49,7 +48,7 @@ public class UserService {
         return users.stream().map(userMapper::userToUserDto).toList();
     }
 
-    @Transactional
+
     public void updateUserById(String userId, RequestUserDto requestUserDto) {
         UUID uuid = UUID.fromString(userId);
         User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
