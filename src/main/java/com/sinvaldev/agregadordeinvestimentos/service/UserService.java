@@ -39,6 +39,8 @@ public class UserService {
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(UserNotFoundException::new);
 
+        log.info("Usuário encontrado");
+
         return userMapper.userToUserDto(user);
     }
 
