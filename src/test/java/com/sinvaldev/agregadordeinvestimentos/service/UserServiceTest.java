@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,6 +39,9 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
+    @Captor
+    private ArgumentCaptor<User> userArgumentCaptor;
+
     @Nested
     class createUser {
 
@@ -51,16 +56,18 @@ class UserServiceTest {
 
             when(userRepository.existsUserByEmail(requestUserDto.email())).thenReturn(false);
             when(userMapper.requestUserDtoToUser(requestUserDto)).thenReturn(user);
-            when(userRepository.save(user)).thenReturn(user);
+            when(userRepository.save(userArgumentCaptor.capture())).thenReturn(user);
             when(userMapper.userToUserDto(user)).thenReturn(userDto);
 
             // Act
             UserDto output = userService.createUser(requestUserDto);
 
             // Assert
-            assertNotNull(output.userId());
-            assertEquals(requestUserDto.userName(), output.userName());
-            assertEquals(requestUserDto.email(), output.email());
+            assertNotNull(output);
+            User userCapture = userArgumentCaptor.getValue();
+            assertEquals(requestUserDto.userName(), userCapture.getUserName());
+            assertEquals(requestUserDto.email(), userCapture.getEmail());
+            assertEquals(requestUserDto.password(), userCapture.getPassword());
 
         }
 
