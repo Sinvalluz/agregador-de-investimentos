@@ -204,7 +204,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should throw exception if user is not found")
-        void shouldThrowExceptionifUserIsNotFound() {
+        void shouldThrowExceptionIfUserIsNotFound() {
             // Arrange
             String uuid = UUID.randomUUID().toString();
 
@@ -215,6 +215,98 @@ class UserServiceTest {
 
             verify(userRepository, never()).deleteById(uuidArgumentCaptor.getValue());
             assertEquals(uuid, uuidArgumentCaptor.getValue().toString());
+
+        }
+    }
+
+    @Nested
+    class updateUserById {
+
+        @Test
+        @DisplayName("should update user with success")
+        void shouldUpdateUserWithSuccess() {
+            // Arrange 👉 O que eu preciso preparar?
+            RequestUserDto requestUserDto = new RequestUserDto(
+                    "newUserName",
+                    "email@email.com",
+                    "newPassword");
+
+            User user = new User(
+                    UUID.randomUUID(),
+                    "userName",
+                    "email@email.com",
+                    "password",
+                    Instant.now(),
+                    Instant.now());
+
+            doReturn(Optional.of(user)).when(userRepository).findById(uuidArgumentCaptor.capture());
+
+            doReturn(false).when(userRepository).existsByEmailAndUserIdNot(eq(requestUserDto.email()) ,uuidArgumentCaptor.capture());
+
+            doReturn(user).when(userRepository).save(userArgumentCaptor.capture());
+
+
+            // Act
+            userService.updateUserById(user.getUserId().toString(), requestUserDto);
+            // Assert
+
+            var uuidList = uuidArgumentCaptor.getAllValues();
+            assertNotNull(uuidList);
+            assertNotNull(requestUserDto.email());
+            assertNotNull(requestUserDto.userName());
+            assertNotNull(requestUserDto.password());
+            assertEquals(requestUserDto.userName(), userArgumentCaptor.getValue().getUserName());
+            assertEquals(requestUserDto.email(), userArgumentCaptor.getValue().getEmail());
+            assertEquals(requestUserDto.password(), userArgumentCaptor.getValue().getPassword());
+
+        }
+
+        @Test
+        @DisplayName("should throw exception if user is not found")
+        void shouldThrowExceptionIfUserIsNotFound() {
+            // Arrange
+            UUID uuid = UUID.randomUUID();
+
+            RequestUserDto requestUserDto = new RequestUserDto(
+                    "newUserName",
+                    "email@email.com",
+                    "newPassword");
+
+            doReturn(Optional.empty()).when(userRepository).findById(uuidArgumentCaptor.capture());
+
+            // Act + assert
+            assertThrows(UserNotFoundException.class, () -> userService.updateUserById(uuid.toString(), requestUserDto));
+
+            assertNotNull(uuidArgumentCaptor.getValue());
+            assertEquals(uuid, uuidArgumentCaptor.getValue());
+            verify(userRepository, never()).existsByEmailAndUserIdNot(any(), any());
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("should throw exception if email already exists")
+        void shouldThrowExceptionIfEmailAlreadyExists() {
+            // Arrange
+            User user = new User(
+                    UUID.randomUUID(),
+                    "userName",
+                    "email@email.com",
+                    "password",
+                    Instant.now(),
+                    Instant.now());
+
+            RequestUserDto requestUserDto = new RequestUserDto(
+                    "newUserName",
+                    "email@email.com",
+                    "newPassword");
+
+            doReturn(Optional.of(user)).when(userRepository).findById(uuidArgumentCaptor.capture());
+            doReturn(true).when(userRepository).existsByEmailAndUserIdNot(eq(requestUserDto.email()), uuidArgumentCaptor.capture());
+
+            // Act + Assert
+            assertThrows(EmailAlreadyExistsException.class, () -> userService.updateUserById(user.getUserId().toString(), requestUserDto));
+            assertEquals(user.getUserId(), uuidArgumentCaptor.getAllValues().getFirst());
+            assertEquals(user.getUserId(), uuidArgumentCaptor.getAllValues().getLast());
 
         }
     }
