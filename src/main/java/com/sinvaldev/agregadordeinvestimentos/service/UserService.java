@@ -34,7 +34,6 @@ public class UserService {
         return userMapper.userToUserDto(user);
     }
 
-
     public UserDto findUserById (String userId) {
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(UserNotFoundException::new);
@@ -50,18 +49,17 @@ public class UserService {
         return users.stream().map(userMapper::userToUserDto).toList();
     }
 
-
     public void updateUserById(String userId, RequestUserDto requestUserDto) {
         UUID uuid = UUID.fromString(userId);
         User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
 
-        if (requestUserDto.email() != null && userRepository.existsByEmailAndUserIdNot(requestUserDto.email(), uuid)) {
+        if (userRepository.existsByEmailAndUserIdNot(requestUserDto.email(), uuid)) {
             throw new EmailAlreadyExistsException();
         }
 
-        user.setUserName(requestUserDto.userName() == null ? user.getUserName(): requestUserDto.userName());
-        user.setEmail(requestUserDto.email() == null ? user.getEmail(): requestUserDto.email());
-        user.setPassword(requestUserDto.password() == null ? user.getPassword(): requestUserDto.password());
+        user.setUserName(requestUserDto.userName() == null || requestUserDto.userName().isBlank() ? user.getUserName(): requestUserDto.userName());
+        user.setEmail(requestUserDto.email() == null || requestUserDto.email().isBlank() ? user.getEmail(): requestUserDto.email());
+        user.setPassword(requestUserDto.password() == null || requestUserDto.password().isBlank() ? user.getPassword(): requestUserDto.password());
 
         userRepository.save(user);
 
