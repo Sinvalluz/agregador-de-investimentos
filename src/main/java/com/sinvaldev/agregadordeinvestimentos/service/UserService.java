@@ -1,14 +1,23 @@
 package com.sinvaldev.agregadordeinvestimentos.service;
 
-import com.sinvaldev.agregadordeinvestimentos.dtos.RequestUserDto;
-import com.sinvaldev.agregadordeinvestimentos.dtos.UserDto;
+import com.sinvaldev.agregadordeinvestimentos.dtos.account.RequestAccountDto;
+import com.sinvaldev.agregadordeinvestimentos.dtos.account.ResponseAccountDto;
+import com.sinvaldev.agregadordeinvestimentos.dtos.user.RequestUserDto;
+import com.sinvaldev.agregadordeinvestimentos.dtos.user.UserDto;
 import com.sinvaldev.agregadordeinvestimentos.exception.EmailAlreadyExistsException;
 import com.sinvaldev.agregadordeinvestimentos.exception.UserNotFoundException;
+import com.sinvaldev.agregadordeinvestimentos.mappers.AccountMapper;
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;
+import com.sinvaldev.agregadordeinvestimentos.model.Account;
+import com.sinvaldev.agregadordeinvestimentos.model.BillingAddress;
 import com.sinvaldev.agregadordeinvestimentos.model.User;
+import com.sinvaldev.agregadordeinvestimentos.repository.AccountRepository;
+import com.sinvaldev.agregadordeinvestimentos.repository.BillingAddressRepository;
 import com.sinvaldev.agregadordeinvestimentos.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,12 +27,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final AccountMapper accountMapper;
+    private final AccountRepository accountRepository;
+    private final BillingAddressRepository billingAddressRepository;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+
+    public UserService(UserRepository userRepository, UserMapper userMapper, AccountMapper accountMapper, AccountRepository accountRepository, BillingAddressRepository billingAddressRepository ) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.accountMapper = accountMapper;
+        this.accountRepository = accountRepository;
+        this.billingAddressRepository = billingAddressRepository;
     }
-
 
     public UserDto createUser(RequestUserDto requestUserDto) {
         if (userRepository.existsUserByEmail(requestUserDto.email())) throw new EmailAlreadyExistsException();
@@ -75,5 +90,40 @@ public class UserService {
         } else {
             throw new UserNotFoundException();
         }
+    }
+
+    public void createAccount(String userId, RequestAccountDto requestAccountDto) {
+        UUID uuid = UUID.fromString(userId);
+        User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
+
+        Account account = new Account(
+                null,
+                requestAccountDto.description(),
+                user,
+                null,
+                new ArrayList<>());
+
+        log.info("Conta mapeada: {}", account.toString());
+
+        var accountCreated = accountRepository.save(account);
+
+        BillingAddress billingAddress = new BillingAddress(
+                accountCreated.getAccountId(),
+                accountCreated,
+                requestAccountDto.street(),
+                requestAccountDto.number());
+
+        billingAddressRepository.save(billingAddress);
+    }
+
+    public List<ResponseAccountDto> listAccounts(String userId) {
+        UUID uuid = UUID.fromString(userId);
+        User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
+
+        return user
+                .getAccounts()
+                .stream()
+                .map(accountMapper::accountToResponseAccountDto)
+                .toList();
     }
 }
