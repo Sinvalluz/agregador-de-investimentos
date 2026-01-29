@@ -1,7 +1,7 @@
 package com.sinvaldev.agregadordeinvestimentos.service;
 
-import com.sinvaldev.agregadordeinvestimentos.dtos.RequestUserDto;
-import com.sinvaldev.agregadordeinvestimentos.dtos.UserDto;
+import com.sinvaldev.agregadordeinvestimentos.dtos.user.RequestUserDto;
+import com.sinvaldev.agregadordeinvestimentos.dtos.user.UserDto;
 import com.sinvaldev.agregadordeinvestimentos.exception.EmailAlreadyExistsException;
 import com.sinvaldev.agregadordeinvestimentos.exception.UserNotFoundException;
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;

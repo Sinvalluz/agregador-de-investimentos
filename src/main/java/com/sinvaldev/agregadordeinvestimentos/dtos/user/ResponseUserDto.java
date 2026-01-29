@@ -1,4 +1,4 @@
-package com.sinvaldev.agregadordeinvestimentos.dtos;
+package com.sinvaldev.agregadordeinvestimentos.dtos.user;
 
 import java.time.Instant;
 import java.util.UUID;
