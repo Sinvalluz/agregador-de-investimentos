@@ -8,6 +8,7 @@ import com.sinvaldev.agregadordeinvestimentos.dtos.user.ResponseUserDto;
 import com.sinvaldev.agregadordeinvestimentos.dtos.user.UserDto;
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;
 import com.sinvaldev.agregadordeinvestimentos.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,15 +19,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/v1/user")
+@AllArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
-
-    public UserController(UserService userService, UserMapper userMapper) {
-        this.userService = userService;
-        this.userMapper = userMapper;
-    }
 
     @PostMapping
     public ResponseEntity<ResponseUserDto> creatUser(@RequestBody RequestUserDto requestUserDto) {

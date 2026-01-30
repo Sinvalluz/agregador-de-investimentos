@@ -14,6 +14,7 @@ import com.sinvaldev.agregadordeinvestimentos.model.User;
 import com.sinvaldev.agregadordeinvestimentos.repository.AccountRepository;
 import com.sinvaldev.agregadordeinvestimentos.repository.BillingAddressRepository;
 import com.sinvaldev.agregadordeinvestimentos.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
@@ -30,15 +32,6 @@ public class UserService {
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
     private final BillingAddressRepository billingAddressRepository;
-
-
-    public UserService(UserRepository userRepository, UserMapper userMapper, AccountMapper accountMapper, AccountRepository accountRepository, BillingAddressRepository billingAddressRepository ) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.accountMapper = accountMapper;
-        this.accountRepository = accountRepository;
-        this.billingAddressRepository = billingAddressRepository;
-    }
 
     public UserDto createUser(RequestUserDto requestUserDto) {
         if (userRepository.existsUserByEmail(requestUserDto.email())) throw new EmailAlreadyExistsException();
