@@ -5,7 +5,7 @@ import com.sinvaldev.agregadordeinvestimentos.dtos.account.ResponseAccountDto;
 import com.sinvaldev.agregadordeinvestimentos.dtos.user.RequestUserDto;
 import com.sinvaldev.agregadordeinvestimentos.dtos.user.UserDto;
 import com.sinvaldev.agregadordeinvestimentos.exception.EmailAlreadyExistsException;
-import com.sinvaldev.agregadordeinvestimentos.exception.UserNotFoundException;
+import com.sinvaldev.agregadordeinvestimentos.exception.NotFoundException;
 import com.sinvaldev.agregadordeinvestimentos.mappers.AccountMapper;
 import com.sinvaldev.agregadordeinvestimentos.mappers.UserMapper;
 import com.sinvaldev.agregadordeinvestimentos.model.Account;
@@ -44,7 +44,7 @@ public class UserService {
 
     public UserDto findUserById (String userId) {
         User user = userRepository.findById(UUID.fromString(userId))
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
         log.info("Usuário encontrado");
 
@@ -59,7 +59,7 @@ public class UserService {
 
     public void updateUserById(String userId, RequestUserDto requestUserDto) {
         UUID uuid = UUID.fromString(userId);
-        User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(uuid).orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
         if (userRepository.existsByEmailAndUserIdNot(requestUserDto.email(), uuid)) {
             throw new EmailAlreadyExistsException();
@@ -81,13 +81,13 @@ public class UserService {
             userRepository.deleteById(uuid);
             log.info("Usuário deletado com sucesso");
         } else {
-            throw new UserNotFoundException();
+            throw new NotFoundException("Usuário não encontrado");
         }
     }
 
     public void createAccount(String userId, RequestAccountDto requestAccountDto) {
         UUID uuid = UUID.fromString(userId);
-        User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(uuid).orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
         Account account = new Account(
                 null,
@@ -96,7 +96,7 @@ public class UserService {
                 null,
                 new ArrayList<>());
 
-        log.info("Conta mapeada: {}", account.toString());
+        log.info("Conta mapeada: {}", account);
 
         var accountCreated = accountRepository.save(account);
 
@@ -111,7 +111,7 @@ public class UserService {
 
     public List<ResponseAccountDto> listAccounts(String userId) {
         UUID uuid = UUID.fromString(userId);
-        User user = userRepository.findById(uuid).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(uuid).orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
         return user
                 .getAccounts()
